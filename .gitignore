@@ -1,0 +1,7 @@
+rust/*/debug
+rust/*/target
+
+rust/*/Cargo.lock
+rust/*/**/*.rs.bk
+rust/*/**/*.pdb
+
