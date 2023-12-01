@@ -2,6 +2,8 @@
 const ASCII_TABLE_INDEX_LETTER_ZERO: u8 = 0x30;
 
 fn main() {
+    let input = include_str!("../day01_input.txt");
+    println!("The result of day_01 part a is: {}", part_a(input));
 }
 
 fn atoi(letter: u8) -> usize {
