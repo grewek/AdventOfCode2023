@@ -57,7 +57,6 @@ fn part_a(input: &str) -> usize {
 
 fn into_u64_value(bytes: &[u8]) -> (u64, u64, u64) {
     //NOTE: Things got out of hand quite quickly this year ~_~
-    //
     match bytes.len() {
         5 => {
             let tlv = (bytes[0] as u64) << 56 | (bytes[1] as u64) << 48 | (bytes[2] as u64) << 40;
@@ -76,10 +75,6 @@ fn into_u64_value(bytes: &[u8]) -> (u64, u64, u64) {
         },
         _ => (0, 0, 0)
     }
-    //let tlv = (bytes[0] as u64) << 56 | (bytes[1] as u64) << 48 | (bytes[2] as u64) << 40;
-    //let folv = tlv | (bytes[3] as u64) << 32;
-    //let filv = folv | (bytes[4] as u64) << 24;
-    //(tlv, folv, filv )//folv, filv)
 }
 
 fn match_written_value(converted: (u64, u64, u64)) -> Option<usize> {
@@ -111,11 +106,8 @@ fn part_b(input: &str) -> usize {
         }
 
         if letter.is_alphanumeric() {
-            //TODO: Try to parse a number from the given string
             let max_slice = std::cmp::min(input.len(), index + 5);
-            println!("OVERFLOW {}", max_slice);
             let pv = &input[index..max_slice];//.as_bytes();
-            println!("{:?}, {:?}", pv, pv.as_bytes());
             if let Some(value) = match_written_value(into_u64_value(pv.as_bytes())) {
                 numbers.push(value);
             }
