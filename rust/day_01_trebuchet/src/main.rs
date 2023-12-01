@@ -17,6 +17,7 @@ const WORD_VALUE_TABLE: [u64; 9] = [
 fn main() {
     let input = include_str!("../day01_input.txt");
     println!("The result of day_01 part a is: {}", part_a(input));
+    println!("The result of day_01 part b is: {}", part_b(input));
 }
 
 fn atoi(letter: u8) -> usize {
@@ -102,9 +103,9 @@ fn part_b(input: &str) -> usize {
                 let value = combine(value_a, value_b);
                 counter += value;
             } else {
-                //let value_a = numbers[0];
-                //let value = combine(value_a, value_a);
-                //counter += value;
+                let value_a = numbers[0];
+                let value = combine(value_a, value_a);
+                counter += value;
             }
             numbers.clear();
         }
