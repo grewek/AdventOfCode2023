@@ -16,13 +16,15 @@ BallContainer :: struct {
 }
 
 main :: proc() {
-    input, err := os.read_entire_file_from_filename("day02ex_a.txt");
-    color_groups: [dynamic]ColorGroup;
+    input, err := os.read_entire_file_from_filename("day02_input.txt");
+    //color_groups: [dynamic]ColorGroup;
+    colors: [dynamic]Colors;
 
     if !err {
         fmt.printf("error: %v\n", err);
         return;
     }
+
     current_position := 0;
     for {
         advance(5, &current_position); //Skip the GAME Token !
@@ -34,35 +36,25 @@ main :: proc() {
         game_id := parse_integer(input, &current_position);
 
         advance(2, &current_position); //Skip ': '
-        color_groups = parse_colorset(input, &current_position);
-        //We do something horrible wrong here !
+        game_colors := parse_colorset(input, &current_position, game_id);
+        game_colors.game_id = game_id;
+        append(&colors, game_colors);
 
-        //NOTE: We cannot parse another game at this point because we are missing the game token !
         if(current_position >= len(input) - 5) {
             break;
         }
     }
 
     sum := 0;
-    for groups, index in color_groups {
+    for round in colors {
+        fmt.printf("%v\n", round.game_id);
+        fmt.printf("%v\n", round.rounds);
+        red_balls : int : 12
+        green_balls : int: 13
+        blue_balls : int : 14
 
-        red_balls := 12;
-        blue_balls := 14;
-        green_balls := 13;
-
-        for object in groups.groups {
-            switch object.color {
-                case Color.Red: red_balls -= object.count;
-                case Color.Blue: blue_balls -= object.count;
-                case Color.Green: green_balls -= object.count;
-                case Color.Error: continue;
-           }
-        }
-
-        if red_balls >= 0 && blue_balls >= 0 && green_balls >= 0 {
-            //NOTE: The game is possible!
-            fmt.printf("Game with ID %d is possible", index + 1);
-            sum += index + 1;
+        if round.max_red <= red_balls && round.max_blue <= blue_balls && round.max_green <= green_balls {
+            sum += round.game_id
         }
     }
 
@@ -138,12 +130,18 @@ ColorObject :: struct {
     color: Color,
 }
 
-ColorGroup :: struct {
-    groups: [dynamic]ColorObject,
+
+Colors :: struct {
+    game_id: int, 
+    rounds: int,
+    max_red: int,
+    max_green: int,
+    max_blue: int,
 }
 
-parse_colorset :: proc(data: []byte, current_position: ^int) -> [dynamic]ColorGroup {
-    sets :[dynamic]ColorGroup;
+parse_colorset :: proc(data: []byte, current_position: ^int, game_id: int) -> Colors {
+    //sets :[dynamic]ColorGroup;
+    game_color_count: Colors;
 
     //Skip the comma if there is any
     if data[current_position^] == ',' {
@@ -155,17 +153,33 @@ parse_colorset :: proc(data: []byte, current_position: ^int) -> [dynamic]ColorGr
     }
 
 
-    group := ColorGroup {};
+    //group := ColorGroup {};
+    colors := Colors {};
+    round_index := 0;
+    fmt.printf("GAME ID: %d\n", game_id);
     for {
         count := parse_integer(data, current_position);
         advance(1, current_position);
         color := parse_color(data, current_position);
 
-        color_object := ColorObject { count, color };
-        append(&group.groups, color_object);
+        fmt.printf("\t->COUNT: %d\n", count);
+        fmt.printf("\t->COLOR: %v\n", color);
+
+        switch color {
+            case Color.Red: {
+                if colors.max_red < count { colors.max_red = count }
+            }
+            case Color.Blue: {
+                if colors.max_blue < count { colors.max_blue = count }
+            }
+            case Color.Green: {
+                if colors.max_green < count { colors.max_green = count }
+            }
+            case Color.Error: continue;
+        }
 
         if data[current_position^] == '\n' {
-            append(&sets, group); //There could still be one group left !
+            fmt.printf("%v\n", colors);
             break;
         }
 
@@ -174,12 +188,12 @@ parse_colorset :: proc(data: []byte, current_position: ^int) -> [dynamic]ColorGr
         }
 
         if data[current_position^] == ';' {
-            append(&sets, group);
-            group = ColorGroup{};
+            round_index += 1;
             advance(2, current_position);
         }
     }
 
-    return sets;
+    colors.rounds = round_index;
+    return colors;
 }
 
