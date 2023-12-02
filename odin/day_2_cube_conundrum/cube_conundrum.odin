@@ -46,6 +46,7 @@ main :: proc() {
     }
 
     sum := 0;
+    cubes := 0;
     for round in colors {
         fmt.printf("%v\n", round.game_id);
         fmt.printf("%v\n", round.rounds);
@@ -56,9 +57,12 @@ main :: proc() {
         if round.max_red <= red_balls && round.max_blue <= blue_balls && round.max_green <= green_balls {
             sum += round.game_id
         }
+
+        cubes += round.max_red * round.max_blue * round.max_green;
     }
 
     fmt.printf("The sum of all possible games is: %d\n", sum);
+    fmt.printf("The sum of all min cubes is: %d\n", cubes);
 }
 
 is_digit :: proc(data: []byte, position: ^int) -> bool {
@@ -196,4 +200,3 @@ parse_colorset :: proc(data: []byte, current_position: ^int, game_id: int) -> Co
     colors.rounds = round_index;
     return colors;
 }
-
