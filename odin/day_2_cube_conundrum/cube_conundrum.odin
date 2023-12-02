@@ -28,7 +28,6 @@ main :: proc() {
         fmt.printf("\t GAME ID: %d\n", game_id);
         advance(2, &current_position); //Skip ': '
         color_groups := parse_colorset(input, &current_position);
-        fmt.printf("color_groups: %v\n", color_groups);
 
         //NOTE: We cannot parse another game at this point because we are missing the game token !
         if(current_position >= len(input) - 5) {
@@ -113,6 +112,7 @@ ColorObject :: struct {
 ColorGroup :: struct {
     groups: [dynamic]ColorObject,
 }
+
 parse_colorset :: proc(data: []byte, current_position: ^int) -> [dynamic]ColorGroup {
     sets :[dynamic]ColorGroup;
 
@@ -136,22 +136,22 @@ parse_colorset :: proc(data: []byte, current_position: ^int) -> [dynamic]ColorGr
         append(&group.groups, color_object);
 
         if data[current_position^] == '\n' {
-            //Found all data sets for this Game
+            append(&sets, group); //There could still be one group left !
             break;
         }
 
         if data[current_position^] == ',' {
-            append(&sets, group);
             advance(2, current_position);
         }
 
         if data[current_position^] == ';' {
             append(&sets, group);
-            group := ColorGroup{};
+            group = ColorGroup{};
             advance(2, current_position);
         }
     }
 
+    fmt.printf("%v", sets);
     return sets;
 }
 
