@@ -9,8 +9,15 @@ advance :: proc(length: int, current_position: ^int) {
     current_position^ += length
 }
 
+BallContainer :: struct {
+    red: int,
+    blue: int,
+    green: int,
+}
+
 main :: proc() {
     input, err := os.read_entire_file_from_filename("day02ex_a.txt");
+    color_groups: [dynamic]ColorGroup;
 
     if !err {
         fmt.printf("error: %v\n", err);
@@ -23,21 +30,43 @@ main :: proc() {
         if input[current_position] == ' ' {
             advance(1, &current_position);
         }
+        //Do we need this ?
         game_id := parse_integer(input, &current_position);
 
-        fmt.printf("\t GAME ID: %d\n", game_id);
         advance(2, &current_position); //Skip ': '
-        color_groups := parse_colorset(input, &current_position);
+        color_groups = parse_colorset(input, &current_position);
+        //We do something horrible wrong here !
 
         //NOTE: We cannot parse another game at this point because we are missing the game token !
         if(current_position >= len(input) - 5) {
             break;
         }
-        //fmt.printf("%s\n", input[current_position:]);
-
-        //current_position += 1; //Skip the new line
-
     }
+
+    sum := 0;
+    for groups, index in color_groups {
+
+        red_balls := 12;
+        blue_balls := 14;
+        green_balls := 13;
+
+        for object in groups.groups {
+            switch object.color {
+                case Color.Red: red_balls -= object.count;
+                case Color.Blue: blue_balls -= object.count;
+                case Color.Green: green_balls -= object.count;
+                case Color.Error: continue;
+           }
+        }
+
+        if red_balls >= 0 && blue_balls >= 0 && green_balls >= 0 {
+            //NOTE: The game is possible!
+            fmt.printf("Game with ID %d is possible", index + 1);
+            sum += index + 1;
+        }
+    }
+
+    fmt.printf("The sum of all possible games is: %d\n", sum);
 }
 
 is_digit :: proc(data: []byte, position: ^int) -> bool {
@@ -151,7 +180,6 @@ parse_colorset :: proc(data: []byte, current_position: ^int) -> [dynamic]ColorGr
         }
     }
 
-    fmt.printf("%v", sets);
     return sets;
 }
 
